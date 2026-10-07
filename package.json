@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/michael-ribeiro-fs/web_project_around_express#readme",
   "dependencies": {
-    "express": "^4.22.2"
+    "express": "^4.22.2",
+    "mongoose": "^9.11.0"
   },
   "devDependencies": {
     "eslint": "^8.56.0",

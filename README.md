@@ -1,183 +1,116 @@
 # Around Express API
 
-API REST desenvolvida para o projeto **Around**, utilizando **Node.js** e **Express**.
+API RESTful do back-end da aplicação **EUA Afora (Around)**, construída com Node.js, Express e MongoDB. Projeto do **Sprint 16** do curso de Desenvolvimento Web da TripleTen.
 
-A aplicação fornece endpoints para consultar usuários e cards, utilizando arquivos JSON como fonte de dados. Este projeto representa o desenvolvimento do back-end da aplicação **EUA Afora (Around)** e foi construído durante o **Sprint 15 do curso de Desenvolvimento Web da TripleTen**.
+## Problema
 
----
+O front-end do Around precisava de um back-end real para gerenciar usuários e cards, já que os dados não podiam mais ficar fixos no código nem se perder ao recarregar a página. Era necessário persistir as informações, validá-las e responder aos erros de forma clara.
 
-## Funcionalidades
+## Solução
 
-A API disponibiliza os seguintes recursos:
+Uma API REST que armazena usuários e cards em um banco MongoDB local (`aroundb`) e permite:
 
-- `GET /users` — retorna a lista completa de usuários.
-- `GET /users/:id` — retorna um usuário específico a partir do seu `_id`.
-- `GET /cards` — retorna a lista completa de cards.
+- criar e listar usuários, buscar por `_id`, atualizar perfil e avatar;
+- criar, listar e excluir cards;
+- curtir e descurtir cards.
 
-Também possui tratamento para os seguintes erros:
+Os dados são validados com Mongoose e os erros retornam os status `400`, `404` e `500`.
 
-- `404` — recurso não encontrado ou usuário inexistente.
-- `500` — erro interno do servidor.
+## Arquitetura
 
-A estrutura da aplicação utiliza uma **arquitetura modular**, com as rotas organizadas em arquivos separados.
+O código é modular, com responsabilidades separadas:
 
----
+```text
+├── routes/        # Define as rotas e as associa aos controladores
+├── controllers/   # Lógica de cada operação e tratamento de erros
+├── models/        # Schemas e validações do Mongoose
+└── app.js         # Configuração do servidor e conexão com o MongoDB
+```
 
-## Tecnologias utilizadas
+Fluxo de uma requisição: **rota → controlador → modelo → MongoDB**.
 
-- **[Node.js](https://nodejs.org/)** — ambiente de execução JavaScript.
-- **[Express](https://expressjs.com/)** — framework para desenvolvimento de aplicações web e APIs com Node.js.
-- **[ESLint](https://eslint.org/)** — ferramenta de análise estática de código, configurada com `airbnb-base`.
-- **[Nodemon](https://nodemon.io/)** — ferramenta para reinicialização automática do servidor durante o desenvolvimento.
+## Decisões Técnicas
 
----
+| Tecnologia                 | Por quê                                                |
+| -------------------------- | ------------------------------------------------------ |
+| **Node.js + Express**      | Criação simples e rápida da API e das rotas            |
+| **MongoDB + Mongoose**     | Banco NoSQL flexível, com schemas e validação de dados |
+| **Arquitetura modular**    | Facilita manutenção e crescimento do projeto           |
+| **ESLint (`airbnb-base`)** | Padroniza e mantém a qualidade do código               |
+| **Nodemon**                | Reinicia o servidor automaticamente no desenvolvimento |
 
-## Como executar o projeto
+## Como Executar
 
-### 1. Clone o repositório
+**Pré-requisitos:** Node.js 20.19+ e MongoDB rodando localmente.
 
 ```bash
+# 1. Clonar e acessar o projeto
 git clone https://github.com/michael-ribeiro-fs/web_project_around_express.git
-```
-
-### 2. Acesse o diretório do projeto
-
-```bash
 cd web_project_around_express
-```
 
-### 3. Instale as dependências
-
-```bash
+# 2. Instalar dependências
 npm install
+
+# 3. Iniciar o servidor
+npm run dev     # desenvolvimento (Nodemon)
+npm start       # produção
 ```
 
-### 4. Inicie o servidor
-
-#### Modo de produção
-
-```bash
-npm run start
-```
-
-#### Modo de desenvolvimento
-
-Para executar o servidor com reinicialização automática:
-
-```bash
-npm run dev
-```
-
----
-
-## Acessando a API
-
-Após iniciar o servidor, a API estará disponível em:
-
-http://localhost:3000
-
----
+O servidor ficará disponível em `http://localhost:3000`.
 
 ## Endpoints
 
-### Listar todos os usuários
+### Usuários
 
-```http
-GET /users
-```
+| Método  | Rota               | Descrição                     |
+| ------- | ------------------ | ----------------------------- |
+| `GET`   | `/users`           | Lista todos os usuários       |
+| `GET`   | `/users/:userId`   | Retorna um usuário pelo `_id` |
+| `POST`  | `/users`           | Cria um usuário               |
+| `PATCH` | `/users/me`        | Atualiza o perfil             |
+| `PATCH` | `/users/me/avatar` | Atualiza o avatar             |
 
-Exemplo:
+### Cards
 
-```http
-GET http://localhost:3000/users
-```
+| Método   | Rota                   | Descrição            |
+| -------- | ---------------------- | -------------------- |
+| `GET`    | `/cards`               | Lista todos os cards |
+| `POST`   | `/cards`               | Cria um card         |
+| `DELETE` | `/cards/:cardId`       | Exclui um card       |
+| `PUT`    | `/cards/:cardId/likes` | Curte um card        |
+| `DELETE` | `/cards/:cardId/likes` | Remove a curtida     |
 
----
+### Exemplo
 
-### Buscar um usuário pelo ID
-
-```http
-GET /users/:id
-```
-
-Exemplo:
-
-```http
-GET http://localhost:3000/users/8340d0ec33270a25f2413b69
-```
-
-#### Exemplo de resposta
+`POST /users`
 
 ```json
 {
-  "name": "Katherine Johnson",
-  "about": "Mathematician",
-  "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Katherine_Johnson_1983.jpg/800px-Katherine_Johnson_1983.jpg",
-  "_id": "8340d0ec33270a25f2413b69"
+  "name": "Jacques Cousteau",
+  "about": "Explorador",
+  "avatar": "https://example.com/avatar.jpg"
 }
 ```
 
----
+### Códigos de erro
 
-### Listar todos os cards
+| Status | Significado                            |
+| ------ | -------------------------------------- |
+| `400`  | Dados inválidos ou `_id` mal formatado |
+| `404`  | Usuário, card ou rota não encontrado   |
+| `500`  | Erro interno do servidor               |
 
-```http
-GET /cards
-```
+## Demonstração
 
-Exemplo:
+[![Assista ao vídeo de demonstração](https://img.youtube.com/vi/SxYC8WOrX_o/maxresdefault.jpg)](https://youtu.be/SxYC8WOrX_o)
 
-```http
-GET http://localhost:3000/cards
-```
+## Próximos Passos
 
----
-
-## Tratamento de erros
-
-A API implementa respostas para diferentes situações de erro.
-
-### Erro 404 — Recurso não encontrado
-
-Retornado quando:
-
-- Uma rota inexistente é acessada.
-- Um usuário com o ID informado não é encontrado.
-
-### Erro 500 — Erro interno do servidor
-
-Retornado quando ocorre um problema inesperado durante o processamento da requisição.
-
----
-
-## Estrutura do projeto
-
-```text
-web_project_around_express/
-├── data/
-│   ├── users.json
-│   └── cards.json
-├── routes/
-│   ├── users.js
-│   └── cards.js
-├── app.js
-├── package.json
-├── .eslintrc.js
-├── .editorconfig
-├── .gitignore
-└── README.md
-```
-
----
-
-## Autor
-
-**Michael Ribeiro**
-
-GitHub: [michael-ribeiro-fs](https://github.com/michael-ribeiro-fs)
-
----
+- Autenticação e autorização de usuários;
+- Tratamento centralizado de erros;
+- Testes automatizados;
+- Deploy da API.
 
 ## Licença
 
-Este projeto foi desenvolvido como parte do curso de Desenvolvimento Web da **TripleTen**, para fins educacionais.
+Projeto educacional desenvolvido para o curso da [TripleTen](https://tripleten.com/). Autor: [Michael Ribeiro](https://github.com/michael-ribeiro-fs).
